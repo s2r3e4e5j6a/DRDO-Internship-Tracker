@@ -55,7 +55,6 @@ streamlit run app.py
 ### Dashboard Summary
 
 ![Dashboard Summary](screenshots/summary.png)
-
 ## Future Improvements
 
 * Real DRDO Internship Scraping
