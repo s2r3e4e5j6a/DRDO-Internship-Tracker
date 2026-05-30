@@ -1,28 +1,30 @@
 # 🚀 DRDO Internship Tracker
 
-A Python + Streamlit application for tracking DRDO internship opportunities.
+A Python and Streamlit-based internship management system designed to track internship opportunities, monitor deadlines, and provide analytics through an interactive dashboard.
 
 ## Features
 
-- Add Internship Records
-- Delete Internship Records
-- Search by Lab Name
-- Filter by Status
-- Days Left Calculation
-- Dashboard Analytics
-- Download CSV Data
-- Internship Deadline Alerts
+* Add Internship Records
+* Delete Internship Records
+* Search Internships
+* Filter by Status
+* Automatic Deadline Tracking
+* Days Left Calculation
+* Internship Analytics Dashboard
+* CSV Data Storage
+* Download Internship Data
 
 ## Technologies Used
 
-- Python
-- Streamlit
-- Pandas
-- BeautifulSoup
-- Requests
+* Python
+* Streamlit
+* Pandas
+* Requests
+* BeautifulSoup
 
 ## Project Structure
 
+```text
 DRDO-Internship-Tracker
 │
 ├── app.py
@@ -32,17 +34,23 @@ DRDO-Internship-Tracker
 │
 └── data
     └── internships.csv
+```
 
-## Run the Project
+## Installation
 
 ```bash
+pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Future Enhancements
+## Future Improvements
 
-- DRDO Website Scraping
-- Email Notifications
-- Internship Deadline Reminders
-- ISRO Internship Tracking
-- GitHub Deployment
+* Real DRDO Internship Scraping
+* Email Notifications
+* Deadline Reminder System
+* ISRO Internship Tracking
+* Cloud Deployment
+
+## Author
+
+Sreeja
