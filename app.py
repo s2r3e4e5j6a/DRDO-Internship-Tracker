@@ -182,11 +182,12 @@ with col2:
 # CHARTS
 # ==========================
 
-st.subheader("Internship Analytics")
 
-status_counts = df["Status"].value_counts()
+st.subheader("Internships by Location")
 
-st.bar_chart(status_counts)
+location_counts = df["Location"].value_counts()
+
+st.bar_chart(location_counts)
 # ==========================
 # DOWNLOAD CSV
 # ==========================
