@@ -42,7 +42,19 @@ DRDO-Internship-Tracker
 pip install -r requirements.txt
 streamlit run app.py
 ```
+## 📸 Project Screenshots
 
+### Dashboard
+
+![Dashboard](screenshots/dashboard.png)
+
+### Analytics Graph
+
+![Analytics Graph](screenshots/graph.png)
+
+### Dashboard Summary
+
+![Dashboard Summary](screenshots/summary.png)
 ## Future Improvements
 
 * Real DRDO Internship Scraping
