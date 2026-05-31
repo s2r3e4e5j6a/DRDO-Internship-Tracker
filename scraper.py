@@ -1,111 +1,38 @@
-import requests
-from bs4 import BeautifulSoup
 import pandas as pd
 
-# ==========================
-# DRDO DATA
-# ==========================
+from sources.drdo import get_drdo_data
+from sources.isro import get_isro_data
+from sources.barc import get_barc_data
 
-def get_drdo_data():
+def process_data(data):
 
-    url = "https://www.drdo.gov.in"
+    today = pd.Timestamp.today()
 
-    response = requests.get(url)
+    for internship in data:
 
-    soup = BeautifulSoup(
-        response.text,
-        "html.parser"
-    )
+        deadline = pd.to_datetime(
+            internship["Deadline"]
+        )
 
-    title = soup.title.text
+        days_left = (
+            deadline - today
+        ).days
 
-    return [
-        {
-            "Lab": title[:40],
-            "Location": "India",
-            "Deadline": "2026-06-30",
-            "Source": "DRDO"
-        }
-    ]
+        internship["Days Left"] = days_left
 
+        if days_left <= 15:
+            internship["Status"] = "Closing Soon"
+        else:
+            internship["Status"] = "Open"
 
-# ==========================
-# ISRO DATA
-# ==========================
-
-def get_isro_data():
-
-    return [
-        {
-            "Lab": "SAC",
-            "Location": "Ahmedabad",
-            "Deadline": "2026-06-25",
-            "Source": "ISRO"
-        }
-    ]
-
-
-# ==========================
-# BARC DATA
-# ==========================
-
-def get_barc_data():
-
-    return [
-        {
-            "Lab": "BARC Training School",
-            "Location": "Mumbai",
-            "Deadline": "2026-06-18",
-            "Source": "BARC"
-        }
-    ]
-
-
-# ==========================
-# MERGE ALL DATA
-# ==========================
-
+    return data
 data = []
 
 data.extend(get_drdo_data())
 data.extend(get_isro_data())
 data.extend(get_barc_data())
-
-
-# ==========================
-# CALCULATE STATUS
-# ==========================
-
-today = pd.Timestamp.today()
-
-for internship in data:
-
-    deadline = pd.to_datetime(
-        internship["Deadline"]
-    )
-
-    days_left = (
-        deadline - today
-    ).days
-
-    internship["Days Left"] = days_left
-
-    if days_left <= 15:
-        internship["Status"] = "Closing Soon"
-    else:
-        internship["Status"] = "Open"
-
-
-# ==========================
-# CREATE DATAFRAME
-# ==========================
-
+data = process_data(data)
 df = pd.DataFrame(data)
-
-
-# ==========================
-# SAVE CSV
-# ==========================
 
 df.to_csv(
     "data/internships.csv",

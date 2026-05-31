@@ -20,6 +20,13 @@ if st.button("🔄 Refresh Internship Data"):
     st.success(
         "Internship data updated!"
     )
+if st.button("📧 Send Internship Report"):
+
+    import email_alert
+
+    st.success(
+        "Internship report sent!"
+    )
 # ==========================
 # LOAD DATA
 # ==========================
