@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import subprocess
 
 # ==========================
 # PAGE CONFIG
@@ -10,12 +11,28 @@ st.set_page_config(
     page_icon="🚀",
     layout="wide"
 )
+if st.button("🔄 Refresh Internship Data"):
 
+    subprocess.run(
+        ["python", "scraper.py"]
+    )
+
+    st.success(
+        "Internship data updated!"
+    )
 # ==========================
 # LOAD DATA
 # ==========================
 
 df = pd.read_csv("data/internships.csv")
+if "Status" not in df.columns:
+    df["Status"] = "Open"
+
+df["Status"] = df["Status"].fillna("Open")
+source_filter = st.selectbox(
+    "Filter by Organization",
+    ["All", "DRDO", "ISRO", "BARC"]
+)
 
 df["Deadline"] = pd.to_datetime(df["Deadline"])
 
@@ -101,6 +118,10 @@ status_filter = st.selectbox(
 )
 
 filtered_df = df.copy()
+if source_filter != "All":
+    filtered_df = filtered_df[
+        filtered_df["Source"] == source_filter
+    ]
 
 if search:
 

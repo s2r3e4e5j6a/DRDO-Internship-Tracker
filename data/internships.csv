@@ -1,5 +1,4 @@
-Lab,Location,Deadline,Status,Source
-DRDL,Hyderabad,2026-06-15,Open,Manual Entry
-VRDE,Maharashtra,2026-06-10,Closing Soon,Manual Entry
-MTRDC,Bengaluru,2026-06-20,Open,Manual Entry
-ade,begaluru,2026-05-30,Closing Soon,Manual Entry
+Lab,Location,Deadline,Source,Days Left,Status
+मुख्य पृष्ठ | रक्षा अनुसंधान एवं विकास स,India,2026-06-30,DRDO,29,Open
+SAC,Ahmedabad,2026-06-25,ISRO,24,Open
+BARC Training School,Mumbai,2026-06-18,BARC,17,Open
