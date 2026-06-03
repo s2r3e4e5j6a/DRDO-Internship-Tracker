@@ -1,9 +1,10 @@
 import pandas as pd
-
+from sources.hal import get_hal_data
+from sources.bel import get_bel_data
 from sources.drdo import get_drdo_data
 from sources.isro import get_isro_data
 from sources.barc import get_barc_data
-
+from extractors.start_parser import get_start_data
 def process_data(data):
 
     today = pd.Timestamp.today()
@@ -27,10 +28,12 @@ def process_data(data):
 
     return data
 data = []
-
+data.extend(get_hal_data())
+data.extend(get_bel_data())
 data.extend(get_drdo_data())
 data.extend(get_isro_data())
 data.extend(get_barc_data())
+data.extend(get_start_data())
 data = process_data(data)
 df = pd.DataFrame(data)
 

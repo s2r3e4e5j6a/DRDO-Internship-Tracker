@@ -1,19 +1,30 @@
 import smtplib
+import pandas as pd
 sender_email = "sreejagurrala23@gmail.com"
 sender_password = "jluyhxnxphzbqput"
 
 receiver_email = "sreejagurrala23@gmail.com"
 
-message = """
+df = pd.read_csv("data/internships.csv")
+
+report = ""
+
+for _, row in df.iterrows():
+
+    report += (
+        f"{row['Lab']} - "
+        f"{row['Location']} - "
+        f"{row['Status']}\n"
+    )
+
+message = f"""
 Subject: DRDO Internship Report
 
 DRDO Internship Tracker Report
 
 Open Internships:
-1. DRDL - Hyderabad
-2. MTRDC - Bengaluru
-3. SAC - Ahmedabad
-4. BARC Training School - Mumbai
+
+{report}
 
 Generated Automatically.
 """

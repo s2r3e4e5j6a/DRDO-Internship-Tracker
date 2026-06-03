@@ -1,18 +1,29 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = "https://www.drdo.gov.in/drdo/offerings/vacancies"
+import requests
+from bs4 import BeautifulSoup
 
-response = requests.get(url)
+def get_drdo_data():
 
-soup = BeautifulSoup(
-    response.text,
-    "html.parser"
-)
+    url = "https://www.drdo.gov.in/drdo/offerings/vacancies"
 
-for heading in soup.find_all(["h1", "h2", "h3", "h4"]):
+    response = requests.get(url)
 
-    text = heading.get_text(strip=True)
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
 
-    if text:
-        print(text)
+    tables = soup.find_all("table")
+
+    print("Tables found:", len(tables))
+
+    return [
+        {
+            "Lab": "DRDO Test",
+            "Location": "India",
+            "Deadline": "2026-06-30",
+            "Source": "DRDO"
+        }
+    ]
