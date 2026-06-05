@@ -55,10 +55,12 @@ streamlit run app.py
 ### Dashboard Summary
 
 ![Dashboard Summary](screenshots/summary.png)
+
+## Live Demo
+
+https://drdo-internship-tracker-sreeja.streamlit.app/
 ## Future Improvements
 
-* Real DRDO Internship Scraping
-* Email Notifications
 * Deadline Reminder System
 * ISRO Internship Tracking
 * Cloud Deployment
