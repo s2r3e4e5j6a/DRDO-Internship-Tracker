@@ -1,10 +1,13 @@
 def get_isro_data():
 
     return [
-        {
-            "Lab": "SAC",
-            "Location": "Ahmedabad",
-            "Deadline": "2026-07-10",
-            "Source": "ISRO"
-        }
+       
+{
+    "Lab": "START 2026",
+    "Location": "Online",
+    "Deadline": "deadline",
+    "Source": "ISRO",
+    "Eligibility": "PG and Final-Year UG Students",
+    "Status": "Open"
+}
     ]

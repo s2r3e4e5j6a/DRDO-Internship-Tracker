@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
 import subprocess
+st.set_page_config(
+    page_title="AI Government Opportunity Tracker",
+    page_icon="🚀",
+    layout="wide"
+)
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 # ==================================
@@ -44,34 +49,12 @@ if not st.session_state.logged_in:
 
     st.stop()
 
-if st.button("Login"):
 
-    if (
-        username == "admin"
-        and
-        password == "admin123"
-    ):
-
-        st.session_state.logged_in = True
-
-        st.success(
-            "Login Successful"
-        )
-
-    else:
-
-        st.error(
-            "Invalid Credentials"
-        )
 # ==================================
 # PAGE CONFIG
 # ==================================
 
-st.set_page_config(
-    page_title="DRDO Internship Tracker",
-    page_icon="🚀",
-    layout="wide"
-)
+
 
 st.info(
     "Track DRDO, ISRO and BARC internship opportunities in one dashboard."
@@ -104,7 +87,10 @@ if "Status" not in df.columns:
 
 df["Status"] = df["Status"].fillna("Open")
 
-df["Deadline"] = pd.to_datetime(df["Deadline"])
+df["Deadline"] = pd.to_datetime(
+    df["Deadline"],
+    errors="coerce"
+)
 
 today = pd.Timestamp.today().normalize()
 
@@ -112,6 +98,7 @@ df["Days Left"] = (
     df["Deadline"] - today
 ).dt.days
 
+df["Days Left"] = df["Days Left"].fillna(-1)
 # ==================================
 # FILTERS
 # ==================================
@@ -127,7 +114,7 @@ search = st.text_input(
 
 status_filter = st.selectbox(
     "Filter by Status",
-    ["All", "Open", "Closing Soon"]
+    ["All", "Open", "Closing Soon", "Expired"]
 )
 
 # ==================================
@@ -141,19 +128,81 @@ st.title("🚀 DRDO Internship Tracker")
 # ==================================
 
 st.subheader("Add New Internship")
+# ==================================
+# ADD INTERNSHIP
+# ==================================
+
+st.subheader("Add New Internship")
 
 with st.form("internship_form"):
 
-    lab = st.text_input("Lab Name")
-
-    location = st.text_input("Location")
-
-    deadline = st.date_input("Deadline")
-
-    submit = st.form_submit_button(
-        "Add Internship"
+    lab = st.text_input(
+        "Lab Name"
     )
 
+    location = st.text_input(
+        "Location"
+    )
+
+    eligibility = st.text_input(
+        "Eligibility"
+    )
+
+    deadline = st.date_input(
+        "Deadline"
+    )
+
+    submit = st.form_submit_button(
+        "➕ Add Internship"
+    )
+
+if submit:
+
+    days_left = (
+        pd.to_datetime(deadline)
+        - pd.Timestamp.today()
+    ).days
+
+    if days_left < 0:
+
+        status = "Expired"
+
+    elif days_left <= 15:
+
+        status = "Closing Soon"
+
+    else:
+
+        status = "Open"
+
+    new_row = pd.DataFrame({
+        "Lab": [lab],
+        "Location": [location],
+        "Eligibility": [eligibility],
+        "Deadline": [deadline],
+        "Source": ["Manual Entry"],
+        "Status": [status]
+    })
+
+    df_save = pd.read_csv(
+        "data/internships.csv"
+    )
+
+    df_save = pd.concat(
+        [df_save, new_row],
+        ignore_index=True
+    )
+
+    df_save.to_csv(
+        "data/internships.csv",
+        index=False
+    )
+
+    st.success(
+        "✅ Internship Added Successfully!"
+    )
+
+    st.rerun()
 if submit:
 
     days_left = (
@@ -169,6 +218,7 @@ if submit:
 
     new_row = pd.DataFrame({
         "Lab": [lab],
+        "Eligibility": [eligibility],
         "Location": [location],
         "Deadline": [deadline],
         "Status": [status],
@@ -232,7 +282,18 @@ st.subheader(
     "Available Internships"
 )
 
-display_df = filtered_df.copy()
+display_columns = [
+    "Lab",
+    "Location",
+    "Eligibility",
+    "Deadline",
+    "Source",
+    "Status"
+]
+
+display_df = filtered_df[
+    display_columns
+].copy()
 
 display_df["Status"] = (
     display_df["Status"]
@@ -252,7 +313,9 @@ st.dataframe(
 # ==================================
 
 urgent = df[
-    df["Days Left"] <= 15
+    (df["Days Left"] <= 15)
+    &
+    (df["Days Left"] >= 0)
 ]
 
 if not urgent.empty:
@@ -260,7 +323,18 @@ if not urgent.empty:
     st.warning(
         "⚠ Internships Closing Soon!"
     )
+    display_columns = [
+    "Lab",
+    "Location",
+    "Deadline",
+    "Source",
+    "Eligibility",
+    "Status"
+]
 
+    st.dataframe(
+            df[display_columns]
+        )
     st.dataframe(
         urgent[
             [
@@ -387,3 +461,8 @@ if st.button(
     )
 
     st.rerun()
+st.markdown("---")
+
+st.caption(
+    "Built using Python, Streamlit, BeautifulSoup, PDF Parsing and Government Open Data Sources."
+)
