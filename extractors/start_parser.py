@@ -43,7 +43,7 @@ def get_start_data():
             {
                 "Lab": "START 2026",
                 "Location": "Online",
-                "Deadline": "2026-02-13",
+                "Deadline": "   2026-02-13",
                 "Eligibility": eligibility,
                 "Source": "ISRO",
                 "Status": "Open"
