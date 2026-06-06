@@ -127,7 +127,7 @@ st.title("🚀 AI Government Opportunity Tracker")
 # ADD INTERNSHIP
 # ==================================
 
-st.subheader("Add New Internship")
+
 # ==================================
 # ADD INTERNSHIP
 # ==================================
