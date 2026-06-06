@@ -121,7 +121,7 @@ status_filter = st.selectbox(
 # TITLE
 # ==================================
 
-st.title("🚀 DRDO Internship Tracker")
+st.title("🚀 AI Government Opportunity Tracker")
 
 # ==================================
 # ADD INTERNSHIP
