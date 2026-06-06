@@ -6,8 +6,7 @@ st.set_page_config(
     page_icon="🚀",
     layout="wide"
 )
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
+
 # ==================================
 # LOGIN SYSTEM
 # ==================================
@@ -134,23 +133,16 @@ st.title("🚀 AI Government Opportunity Tracker")
 
 st.subheader("Add New Internship")
 
+
 with st.form("internship_form"):
 
-    lab = st.text_input(
-        "Lab Name"
-    )
+    lab = st.text_input("Lab Name")
 
-    location = st.text_input(
-        "Location"
-    )
+    location = st.text_input("Location")
 
-    eligibility = st.text_input(
-        "Eligibility"
-    )
+    eligibility = st.text_input("Eligibility")
 
-    deadline = st.date_input(
-        "Deadline"
-    )
+    deadline = st.date_input("Deadline")
 
     submit = st.form_submit_button(
         "➕ Add Internship"
@@ -203,45 +195,7 @@ if submit:
     )
 
     st.rerun()
-if submit:
 
-    days_left = (
-        pd.to_datetime(deadline)
-        - pd.Timestamp.today()
-    ).days
-
-    status = (
-        "Closing Soon"
-        if days_left <= 15
-        else "Open"
-    )
-
-    new_row = pd.DataFrame({
-        "Lab": [lab],
-        "Eligibility": [eligibility],
-        "Location": [location],
-        "Deadline": [deadline],
-        "Status": [status],
-        "Source": ["Manual Entry"]
-    })
-
-    df_save = pd.read_csv(
-        "data/internships.csv"
-    )
-
-    df_save = pd.concat(
-        [df_save, new_row],
-        ignore_index=True
-    )
-
-    df_save.to_csv(
-        "data/internships.csv",
-        index=False
-    )
-
-    st.success(
-        "✅ Internship Added Successfully!"
-    )
 
 # ==================================
 # FILTER DATA
