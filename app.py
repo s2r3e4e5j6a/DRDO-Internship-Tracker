@@ -1,49 +1,160 @@
 import streamlit as st
 import pandas as pd
-
-# ==========================
-# PAGE CONFIG
-# ==========================
-
+import subprocess
 st.set_page_config(
-    page_title="DRDO Internship Tracker",
+    page_title="AI Government Opportunity Tracker",
     page_icon="🚀",
     layout="wide"
 )
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+# ==================================
+# LOGIN SYSTEM
+# ==================================
 
-# ==========================
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if not st.session_state.logged_in:
+
+    st.title("🔐 Admin Login")
+
+    username = st.text_input(
+        "Username",
+        key="admin_username"
+    )
+
+    password = st.text_input(
+        "Password",
+        type="password",
+        key="admin_password"
+    )
+
+    if st.button(
+        "Login",
+        key="login_button"
+    ):
+
+        if (
+            username == "admin"
+            and password == "admin123"
+        ):
+
+            st.session_state.logged_in = True
+            st.success("Login Successful")
+            st.rerun()
+
+        else:
+            st.error("Invalid Credentials")
+
+    st.stop()
+
+
+# ==================================
+# PAGE CONFIG
+# ==================================
+
+
+
+st.info(
+    "Track DRDO, ISRO and BARC internship opportunities in one dashboard."
+)
+
+# ==================================
+# ACTION BUTTONS
+# ==================================
+
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🔄 Refresh Internship Data"):
+        subprocess.run(["python", "scraper.py"])
+        st.success("Internship data updated!")
+
+with col2:
+    if st.button("📧 Send Internship Report"):
+        import email_alert
+        st.success("Internship report sent successfully!")
+
+# ==================================
 # LOAD DATA
-# ==========================
+# ==================================
 
 df = pd.read_csv("data/internships.csv")
 
-df["Deadline"] = pd.to_datetime(df["Deadline"])
+if "Status" not in df.columns:
+    df["Status"] = "Open"
+
+df["Status"] = df["Status"].fillna("Open")
+
+df["Deadline"] = pd.to_datetime(
+    df["Deadline"],
+    errors="coerce"
+)
 
 today = pd.Timestamp.today().normalize()
 
-df["Days Left"] = (df["Deadline"] - today).dt.days
+df["Days Left"] = (
+    df["Deadline"] - today
+).dt.days
 
-# ==========================
+df["Days Left"] = df["Days Left"].fillna(-1)
+# ==================================
+# FILTERS
+# ==================================
+
+source_filter = st.selectbox(
+    "Filter by Organization",
+    ["All", "DRDO", "ISRO", "BARC", "HAL", "BEL"]
+)
+
+search = st.text_input(
+    "Search by Lab or Location"
+)
+
+status_filter = st.selectbox(
+    "Filter by Status",
+    ["All", "Open", "Closing Soon", "Expired"]
+)
+
+# ==================================
 # TITLE
-# ==========================
+# ==================================
 
 st.title("🚀 DRDO Internship Tracker")
 
-# ==========================
+# ==================================
 # ADD INTERNSHIP
-# ==========================
+# ==================================
+
+st.subheader("Add New Internship")
+# ==================================
+# ADD INTERNSHIP
+# ==================================
 
 st.subheader("Add New Internship")
 
 with st.form("internship_form"):
 
-    lab = st.text_input("Lab Name")
+    lab = st.text_input(
+        "Lab Name"
+    )
 
-    location = st.text_input("Location")
+    location = st.text_input(
+        "Location"
+    )
 
-    deadline = st.date_input("Deadline")
+    eligibility = st.text_input(
+        "Eligibility"
+    )
 
-    submit = st.form_submit_button("Add Internship")
+    deadline = st.date_input(
+        "Deadline"
+    )
+
+    submit = st.form_submit_button(
+        "➕ Add Internship"
+    )
 
 if submit:
 
@@ -52,13 +163,62 @@ if submit:
         - pd.Timestamp.today()
     ).days
 
-    if days_left <= 15:
+    if days_left < 0:
+
+        status = "Expired"
+
+    elif days_left <= 15:
+
         status = "Closing Soon"
+
     else:
+
         status = "Open"
 
     new_row = pd.DataFrame({
         "Lab": [lab],
+        "Location": [location],
+        "Eligibility": [eligibility],
+        "Deadline": [deadline],
+        "Source": ["Manual Entry"],
+        "Status": [status]
+    })
+
+    df_save = pd.read_csv(
+        "data/internships.csv"
+    )
+
+    df_save = pd.concat(
+        [df_save, new_row],
+        ignore_index=True
+    )
+
+    df_save.to_csv(
+        "data/internships.csv",
+        index=False
+    )
+
+    st.success(
+        "✅ Internship Added Successfully!"
+    )
+
+    st.rerun()
+if submit:
+
+    days_left = (
+        pd.to_datetime(deadline)
+        - pd.Timestamp.today()
+    ).days
+
+    status = (
+        "Closing Soon"
+        if days_left <= 15
+        else "Open"
+    )
+
+    new_row = pd.DataFrame({
+        "Lab": [lab],
+        "Eligibility": [eligibility],
         "Location": [location],
         "Deadline": [deadline],
         "Status": [status],
@@ -83,27 +243,18 @@ if submit:
         "✅ Internship Added Successfully!"
     )
 
-# ==========================
-# SEARCH
-# ==========================
-
-search = st.text_input(
-    "Search by Lab or Location"
-)
-
-# ==========================
-# FILTER
-# ==========================
-
-status_filter = st.selectbox(
-    "Filter by Status",
-    ["All", "Open", "Closing Soon"]
-)
+# ==================================
+# FILTER DATA
+# ==================================
 
 filtered_df = df.copy()
 
-if search:
+if source_filter != "All":
+    filtered_df = filtered_df[
+        filtered_df["Source"] == source_filter
+    ]
 
+if search:
     filtered_df = filtered_df[
         filtered_df["Lab"].str.contains(
             search,
@@ -119,51 +270,91 @@ if search:
     ]
 
 if status_filter != "All":
-
     filtered_df = filtered_df[
         filtered_df["Status"] == status_filter
     ]
 
-# ==========================
-# TABLE
-# ==========================
+# ==================================
+# AVAILABLE INTERNSHIPS
+# ==================================
 
-st.subheader("Available Internships")
+st.subheader(
+    "Available Internships"
+)
 
-display_df = filtered_df.copy()
+display_columns = [
+    "Lab",
+    "Location",
+    "Eligibility",
+    "Deadline",
+    "Source",
+    "Status"
+]
 
-display_df["Status"] = display_df["Status"].replace({
-    "Open": "🟢 Open",
-    "Closing Soon": "🟠 Closing Soon"
-})
+display_df = filtered_df[
+    display_columns
+].copy()
 
-st.dataframe(display_df)
+display_df["Status"] = (
+    display_df["Status"]
+    .replace({
+        "Open": "🟢 Open",
+        "Closing Soon": "🟠 Closing Soon"
+    })
+)
 
-# ==========================
-# URGENT DEADLINES
-# ==========================
+st.dataframe(
+    display_df,
+    width="stretch"
+)
 
-urgent = df[df["Days Left"] <= 15]
+# ==================================
+# CLOSING SOON
+# ==================================
+
+urgent = df[
+    (df["Days Left"] <= 15)
+    &
+    (df["Days Left"] >= 0)
+]
 
 if not urgent.empty:
 
     st.warning(
         "⚠ Internships Closing Soon!"
     )
+    display_columns = [
+    "Lab",
+    "Location",
+    "Deadline",
+    "Source",
+    "Eligibility",
+    "Status"
+]
 
     st.dataframe(
+            df[display_columns]
+        )
+    st.dataframe(
         urgent[
-            ["Lab", "Deadline", "Days Left"]
-        ]
+            [
+                "Lab",
+                "Deadline",
+                "Days Left"
+            ]
+        ],
+        use_container_width=True
     )
 
-# ==========================
+# ==================================
 # DASHBOARD SUMMARY
-# ==========================
+# ==================================
 
-st.subheader("Dashboard Summary")
+st.subheader(
+    "Dashboard Summary"
+)
 
-col1, col2 = st.columns(2)
+col1, col2, col3 = st.columns(3)
 
 with col1:
     st.metric(
@@ -178,23 +369,59 @@ with col2:
             df[df["Status"] == "Open"]
         )
     )
-# ==========================
-# CHARTS
-# ==========================
 
+with col3:
+    st.metric(
+        "Closing Soon",
+        len(
+            df[df["Status"] == "Closing Soon"]
+        )
+    )
+# ==================================
+# CHART
+# ==================================
 
-st.subheader("Internships by Location")
+st.subheader(
+    "Internships by Location"
+)
 
-location_counts = df["Location"].value_counts()
+location_counts = (
+    df["Location"]
+    .value_counts()
+)
 
 st.bar_chart(location_counts)
-# ==========================
+
+# ==================================
 # DOWNLOAD CSV
-# ==========================
+# ==================================
 
-st.subheader("Download Data")
+st.subheader(
+    "Download Data"
+)
+from pdf_report import generate_pdf
 
-csv = df.to_csv(index=False)
+if st.button(
+    "📄 Generate PDF Report",
+    key="pdf_button"
+):
+
+    pdf_file = generate_pdf()
+
+    with open(
+        pdf_file,
+        "rb"
+    ) as file:
+
+        st.download_button(
+            label="⬇ Download PDF",
+            data=file,
+            file_name=pdf_file,
+            mime="application/pdf"
+        )
+csv = df.to_csv(
+    index=False
+)
 
 st.download_button(
     label="⬇ Download Internship Data",
@@ -202,11 +429,14 @@ st.download_button(
     file_name="internships.csv",
     mime="text/csv"
 )
-# ==========================
-# DELETE INTERNSHIP
-# ==========================
 
-st.subheader("Delete Internship")
+# ==================================
+# DELETE INTERNSHIP
+# ==================================
+
+st.subheader(
+    "Delete Internship"
+)
 
 lab_to_delete = st.selectbox(
     "Select Lab to Delete",
@@ -229,3 +459,10 @@ if st.button(
     st.success(
         f"✅ {lab_to_delete} deleted successfully!"
     )
+
+    st.rerun()
+st.markdown("---")
+
+st.caption(
+    "Built using Python, Streamlit, BeautifulSoup, PDF Parsing and Government Open Data Sources."
+)
